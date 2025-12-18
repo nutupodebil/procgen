@@ -6,9 +6,9 @@ public class Main {
         int winHeight = 800;
         int cols = 128;
         int rows = 80;
-        int size = 10;
+        int cellSize = 10;
 
-        GridFrame frame = new GridFrame(size, cols, rows, winWidth, winHeight);
+        GridFrame frame = new GridFrame(cellSize, cols, rows, winWidth, winHeight);
 
         while (true){
             frame.repaint();

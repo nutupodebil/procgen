@@ -13,10 +13,9 @@ public class GridFrame extends JFrame {
 
     public GridFrame(int size, int cols, int rows, int w, int h) {
         this.setTitle("Клетчатое поле");
-        this.setSize(w+40,h+80);
+        this.setSize(w+32,h+60);
         this.setVisible(true);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        //this.setResizable(false);
 
         this.cols = cols;
         this.rows = rows;
@@ -26,10 +25,6 @@ public class GridFrame extends JFrame {
         winHeight = h;
 
         grid = new Grid(cellSize, cols, rows, winWidth, winHeight);
-
-        //this.setPreferredSize(new Dimension(winWidth, winHeight));
-        //this.pack();
-        //this.setLocationRelativeTo(null);
     }
 
     @Override

@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.util.Random;
 
-
 public class Grid {
     Random rand = new Random();
     int winWidth;
@@ -29,7 +28,7 @@ public class Grid {
         }
     }
 
-    void randomGrid(int cols, int rows){
+    void randomGrid(){
         for (int x = 0; x != cols; x++) {
             for (int y = 0; y != rows; y++) {
                 grid[x][y] = rand.nextInt(0,5);
@@ -37,7 +36,7 @@ public class Grid {
         }
     }
 
-    void edgeCheckGrid(int cols, int rows){
+    void edgeCheckGrid(){
         for (int x = 0; x != cols; x++){
             for (int y = 0; y != rows; y++){
                 if (x == 0 || y == 0 || x == cols-1 || y == rows-1){
@@ -56,7 +55,7 @@ public class Grid {
             case 2 -> Color.RED;
             case 3 -> Color.BLUE;
             case 4 -> Color.GREEN;
-            default -> Color.WHITE; //GRAY;
+            default -> Color.WHITE;
         };
     }
 
@@ -65,19 +64,18 @@ public class Grid {
             return;
         }
 
-        randomGrid(cols, rows);
+        //edgeCheckGrid();
+        randomGrid();
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
                 Color color = getColorForValue(grid[x][y]);
                 g.setColor(color);
 
-                g.fillRect(x * cellSize + 10, y * cellSize + 40, cellSize, cellSize);
+                g.fillRect(x * cellSize + 15, y * cellSize + 40, cellSize, cellSize);
 
                 g.setColor(Color.GRAY);
-                g.drawRect(x * cellSize + 10, y * cellSize + 40, cellSize, cellSize);
-
-                //grid[x][y] = (grid[x][y]+1)%5;
+                g.drawRect(x * cellSize + 15, y * cellSize + 40, cellSize, cellSize);
             }
         }
     }
