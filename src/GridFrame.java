@@ -21,6 +21,8 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
 
     boolean up = false, left = false, down = false, right = false;
 
+    Font font = new Font("Arial", Font.BOLD, 18);
+
     public GridFrame(double size, int w, int h) {
         this.setTitle("Йо-хо-хо-хо!  xx");
 
@@ -56,6 +58,11 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
         grid.setCam((int)camx, (int)camy);
         grid.setCellSize(cellSize);
         grid.paint(g);
+
+        g.setColor(Color.BLACK);
+        g.setFont(this.font);
+        g.drawString("Cell size - "+cellSize, winWidth-200, winHeight-100);
+        g.drawString("Velocity  - "+String.format("%.2f", vel), winWidth-200, winHeight-80);
 
         g.dispose();                // Освободить все временные ресурсы графики (после этого в нее уже нельзя рисовать)
         bufferStrategy.show();      // Сказать буферизирующей стратегии отрисовать новый буфер (т.е. поменять показываемый и обновляемый буферы местами)

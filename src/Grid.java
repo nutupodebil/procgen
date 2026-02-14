@@ -80,7 +80,7 @@ public class Grid {
             for (int y = 0; y < rows; y++) {
                 //Color color = getColorForValue(randomPoint());  //random noise grid
 
-                Color color = getColorForValue(noisePoint(0.05,10,1.3,x+camx,y+camy));  //noise grid
+                Color color = getColorForValue(noisePoint(0.05,12,1.3,x+camx-cols/2,y+camy-rows/2));  //fractal noise grid
                 g.setColor(color);
 
                 g.fillRect((int)(x * cellSize),
