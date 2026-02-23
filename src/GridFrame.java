@@ -54,6 +54,7 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
         if (right) camx += vel;
 
         //System.out.println(vel);    //some logs
+        //System.out.println(up+" "+down+" "+left+" "+right);
 
         grid.setCam((int)camx, (int)camy);
         grid.setCellSize(cellSize);
@@ -61,8 +62,9 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
 
         g.setColor(Color.BLACK);
         g.setFont(this.font);
-        g.drawString("Cell size - "+cellSize, winWidth-200, winHeight-100);
-        g.drawString("Velocity  - "+String.format("%.2f", vel), winWidth-200, winHeight-80);
+        g.drawString("cellSize -- "+cellSize, winWidth-220, winHeight-100);
+        g.drawString("vel      -- "+String.format("%.2f", vel), winWidth-220, winHeight-80);
+        g.drawString("cam      -- x:"+(int)camx+" y:"+(int)camy, winWidth-220, winHeight-60);
 
         g.dispose();                // Освободить все временные ресурсы графики (после этого в нее уже нельзя рисовать)
         bufferStrategy.show();      // Сказать буферизирующей стратегии отрисовать новый буфер (т.е. поменять показываемый и обновляемый буферы местами)
@@ -93,8 +95,7 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
         }
 
         if ((e.getID() == KeyEvent.KEY_PRESSED) && (e.getKeyCode() == KeyEvent.VK_D)){
-            right = true;
-        }
+            right = true;        }
         if ((e.getID() == KeyEvent.KEY_RELEASED) && (e.getKeyCode() == KeyEvent.VK_D)){
             right = false;
         }
@@ -103,7 +104,7 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
             cellSize = min(15.0, cellSize+0.25);
             vel = 24.0/(cellSize*cellSize);
         } else if ((e.getID() == KeyEvent.KEY_PRESSED) && (e.getKeyCode() == KeyEvent.VK_O)){
-            cellSize = max(1.0, cellSize-0.25);
+            cellSize = max(1.5, cellSize-0.25);
             vel = 24.0/(cellSize*cellSize);
         }
 
