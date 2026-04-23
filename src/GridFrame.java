@@ -1,12 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class GridFrame extends JFrame implements KeyEventDispatcher {
+public class GridFrame extends JFrame implements KeyEventDispatcher, MouseListener, MouseMotionListener, MouseWheelListener {
     int winWidth = 1280;
     int winHeight = 800;
 
@@ -17,11 +17,18 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
     double camx = 0.0;
     double camy = 0.0;
 
+    int mouseX = 0;
+    int mouseY = 0;
+
     double vel = 24.0/(cellSize*cellSize);
 
     boolean up = false, left = false, down = false, right = false;
 
-    Font font = new Font("Arial", Font.BOLD, 18);
+    boolean logFlag = false;
+
+    Font font = new Font("Arial", Font.BOLD, 20);
+    FontMetrics metrics = getFontMetrics(font);
+    int textXOffset = -160;
 
     public GridFrame(double size, int w, int h) {
         this.setTitle("Йо-хо-хо-хо!  xx");
@@ -34,6 +41,10 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
 
         winWidth = w;
         winHeight = h;
+
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        addMouseWheelListener(this);
 
         grid = new Grid(cellSize, winWidth, winHeight);
     }
@@ -55,16 +66,31 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
 
         //System.out.println(vel);    //some logs
         //System.out.println(up+" "+down+" "+left+" "+right);
+        //System.out.println(mouseX+" "+mouseY);
 
         grid.setCam((int)camx, (int)camy);
+        grid.setMouse(mouseX, mouseY);
         grid.setCellSize(cellSize);
+        grid.setLogFlag(logFlag);
         grid.paint(g);
+
+        long rendTilesNum = grid.getRendTilesNum();
+        long rendCityNum = grid.getRendCitiesNum();
+
+        String camxinfo = "cam X: "+(int)camx;
+        String camyinfo = "cam Y: "+(int)camy;
+        String citiesinfo = "cities num: "+rendCityNum;
+
+        textXOffset = -160; //-max(160, max(metrics.stringWidth(citiesinfo),max(metrics.stringWidth(camxinfo), metrics.stringWidth(camyinfo))));
 
         g.setColor(Color.BLACK);
         g.setFont(this.font);
-        g.drawString("cellSize -- "+cellSize, winWidth-220, winHeight-100);
-        g.drawString("vel      -- "+String.format("%.2f", vel), winWidth-220, winHeight-80);
-        g.drawString("cam      -- x:"+(int)camx+" y:"+(int)camy, winWidth-220, winHeight-60);
+        g.drawString(camxinfo, winWidth+textXOffset, winHeight-140);
+        g.drawString(camyinfo, winWidth+textXOffset, winHeight-120);
+        g.drawString("cell size: "+cellSize, winWidth+textXOffset, winHeight-100);
+        g.drawString("velocity: "+String.format("%.2f", vel), winWidth+textXOffset, winHeight-80);
+        g.drawString("tiles num: "+rendTilesNum, winWidth+textXOffset, winHeight-60);
+        g.drawString(citiesinfo, winWidth+textXOffset, winHeight-40);
 
         g.dispose();                // Освободить все временные ресурсы графики (после этого в нее уже нельзя рисовать)
         bufferStrategy.show();      // Сказать буферизирующей стратегии отрисовать новый буфер (т.е. поменять показываемый и обновляемый буферы местами)
@@ -108,6 +134,57 @@ public class GridFrame extends JFrame implements KeyEventDispatcher {
             vel = 24.0/(cellSize*cellSize);
         }
 
+        if ((e.getID() == KeyEvent.KEY_PRESSED) && (e.getKeyCode() == KeyEvent.VK_L)){
+            logFlag = !logFlag;
+        }
+
         return false;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        if (e.getWheelRotation() < 0){
+            cellSize = min(15.0, cellSize+0.25);
+            vel = 24.0/(cellSize*cellSize);
+        } else {
+            cellSize = max(1.5, cellSize-0.25);
+            vel = 24.0/(cellSize*cellSize);
+        }
     }
 }

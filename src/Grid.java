@@ -18,18 +18,24 @@ public class Grid {
     int camx = 0;
     int camy = 0;
 
+    int mouseX = 0;
+    int mouseY = 0;
+
+    boolean logFlag = false;
+
     final int TILE_SIZE = 500;
 
     CityGen ctGen;
 
     final int CITY_NUM = 2;
-    final int CITY_SIZE = 100;
-    final long CITY_DIST = 250; //400;
+    final int CITY_SIZE = 128;
+    final long CITY_DIST = CITY_SIZE*3; //400;
+    long rendCityNum = 0;
 
     HashMap<Point, int[][]> tiles = new HashMap<Point, int[][]>();
-    HashMap<Point, Point> cities = new HashMap<Point, Point>();
+    HashMap<Point, ArrayList<Point>> cities = new HashMap<Point, ArrayList<Point>>();
 
-    ImprovedPerlinNoise perlin = new ImprovedPerlinNoise(239239239L); //239239239L
+    ImprovedPerlinNoise perlin = new ImprovedPerlinNoise(239239239L);
 
     Grid(double size, int w, int h){
         this.cellSize = size;
@@ -43,8 +49,25 @@ public class Grid {
         camy = y;
     }
 
+    void setMouse(int x, int y){
+        mouseX = x;
+        mouseY = y;
+    }
+
     void setCellSize(double cs){
         cellSize = cs;
+    }
+
+    void setLogFlag(boolean flag){
+        logFlag = flag;
+    }
+
+    long getRendTilesNum(){
+        return tiles.size();
+    }
+
+    long getRendCitiesNum(){
+        return rendCityNum;
     }
 
     int noisePoint(double defFreq, int octaves, double k, int x, int y){
@@ -89,8 +112,11 @@ public class Grid {
             case 4 -> new Color(0,100,0);
 
             case 5 -> new Color(129, 84, 56); //Color(186, 140, 99);
+            case 6 -> new Color(152, 155,151);
+            case 7 -> new Color(89, 44,16);
 
             case 239 -> Color.RED;
+            case 240 -> Color.GRAY;
 
             default -> Color.BLUE;
         };
@@ -113,10 +139,12 @@ public class Grid {
     boolean checkCityDist(int x, int y){
         if (CITY_DIST == 0L) return true;
         Set <Point> keys = cities.keySet();
-        for (Point p : keys){
-            long dx = abs((long)cities.get(p).x - (long)x);
-            long dy = abs((long)cities.get(p).y - (long)y);
-            if ((dx*dx + dy*dy) < CITY_DIST*CITY_DIST) return false;
+        for (Point key : keys){
+            for (Point city : cities.get(key)) {
+                long dx = abs((long) city.x - (long) x);
+                long dy = abs((long) city.y - (long) y);
+                if ((dx * dx + dy * dy) < CITY_DIST * CITY_DIST) return false;
+            }
         }
         return true;
     }
@@ -139,30 +167,22 @@ public class Grid {
 
                 Point city = new Point(origin.x + i, origin.y + j);
                 if (sum == target && checkCityDist(city.x, city.y) && num < CITY_NUM) {
-                    cities.put(origin, city);
+                    if (!cities.containsKey(origin)) {
+                        ArrayList<Point> cts = new ArrayList<>();
+                        cts.add(city);
+                        cities.put(origin, cts);
+                    } else {
+                        cities.get(origin).add(city);
+                    }
 
-                    checkCity(tile, i, j);
                     ctGen.addCity(tile, origin, new Point(i, j), CITY_SIZE);
+
+                    rendCityNum += 1;
 
                     num += 1;
                     if (num == 2) return;
                 }
             }
-        }
-    }
-
-    void checkCity(int[][] tile, int x, int y){
-        for (int i = x; i != x+CITY_SIZE; ++i){
-            tile[i][y] = 239;
-        }
-        for (int i = x; i != x+CITY_SIZE; ++i){
-            tile[i][y+CITY_SIZE-1] = 239;
-        }
-        for (int i = y; i != y+CITY_SIZE; ++i){
-            tile[x][i] = 239;
-        }
-        for (int i = y; i != y+CITY_SIZE; ++i){
-            tile[x+CITY_SIZE-1][i] = 239;
         }
     }
 
@@ -175,9 +195,8 @@ public class Grid {
 
         for (int i = 0; i < cols; i++) {
             for (int j = 0; j < rows; j++) {
-                //Color color = getColorForValue(randomPoint());  //random noise grid
+                //int val = randomPoint();  //random noise grid
 
-                Color color = Color.RED;
                 int x = i + camx-cols/2;
                 int y = j + camy-rows/2;
 
@@ -188,21 +207,51 @@ public class Grid {
                     saveTile(key);
                 }
 
-                color = getColorForValue(tiles.get(key)[x - key.x][y - key.y]);
+                int val = tiles.get(key)[x - key.x][y - key.y];
 
-//                if (x % TILE_SIZE == 0 || y % TILE_SIZE == 0){  // check tiles
-//                    color = Color.GRAY;
-//                }
+                if (logFlag){
+                    if (x % TILE_SIZE == 0 || y % TILE_SIZE == 0){
+                        val = 240;
+                    }
 
-                g.setColor(color);
+                    if (cities.containsKey(key)) {
+                        ArrayList<Point> keys = cities.get(key);
+                        for (Point city : keys) {
+                            if (x == city.x && (y >= city.y && y < city.y + CITY_SIZE)) {
+                                val = 239;
+                                break;
+                            } else if (x == city.x + CITY_SIZE - 1 && (y >= city.y && y < city.y + CITY_SIZE)) {
+                                val = 239;
+                                break;
+                            } else if (y == city.y && (x >= city.x && x < city.x + CITY_SIZE)) {
+                                val = 239;
+                                break;
+                            } else if (y == city.y + CITY_SIZE - 1 && (x >= city.x && x < city.x + CITY_SIZE)) {
+                                val = 239;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                boolean mouseFlag = false;
+                if (mouseX >= (int)(i * cellSize) && mouseX <= (int)((i+1)*cellSize) &&
+                        mouseY >= (int)(j * cellSize) && mouseY <= (int)((j+1) * cellSize)){
+                    mouseFlag = true;
+                }
+
+                g.setColor(getColorForValue(val));
+
+                if (mouseFlag && cellSize >= 8) g.setColor(new Color(168,0,168));
 
                 g.fillRect((int)(i * cellSize),
                            (int)(j * cellSize),
                            (int)((i+1)*cellSize) - (int)(i*cellSize),
                            (int)((j+1)*cellSize) - (int)(j*cellSize));
 
-                if (cellSize >= 10.5){
-                    g.setColor(Color.GRAY);  //only if cell size >= 5
+                if (cellSize >= 11){  //only if cell size >= 11
+                    if (!mouseFlag) g.setColor(Color.GRAY);
+                    else g.setColor(Color.BLACK);
                     g.drawRect((int)(i * cellSize),
                             (int)(j * cellSize),
                             (int)((i+1)*cellSize) - (int)(i*cellSize),
